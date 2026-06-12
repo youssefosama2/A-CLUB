@@ -197,294 +197,298 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section className="hero d-flex align-items-center">
-      <div className="container text-white text-center">
-        <span className="badge bg-primary mb-3">
-          {t("hero.badge")} ⚽
-        </span>
+    <>
+      <section>
+        <img src="\assets\img\logo-a-club.jpg" alt="logo-a-club" width={100} height={100} className="logo-a-club" />
+      </section>
+      <section className="hero d-flex align-items-center">
+        <div className="container text-white text-center">
+          <span className="badge bg-primary mb-3">
+            {t("hero.badge")} ⚽
+          </span>
+          <h1 className="fw-bold mb-3">{t("hero.title")}</h1>
+          <p className="mb-4">{t("hero.desc")}</p>
 
-        <h1 className="fw-bold mb-3">{t("hero.title")}</h1>
-        <p className="mb-4">{t("hero.desc")}</p>
+          <div className="d-flex justify-content-center gap-3 flex-wrap">
+            {/* <button
+              className="btn btn-primary px-4 join-btn"
+              onClick={() => handleJoin({ type: "info", plan: t("hero.plan") })}
+            >
+              {t("hero.join")}
+            </button> */}
+            <button
+              className="btn btn-outline-light px-4"
+              onClick={async () => {
 
-        <div className="d-flex justify-content-center gap-3 flex-wrap">
-          {/* <button
-            className="btn btn-primary px-4 join-btn"
-            onClick={() => handleJoin({ type: "info", plan: t("hero.plan") })}
-          >
-            {t("hero.join")}
-          </button> */}
-          <button
-            className="btn btn-outline-light px-4"
-            onClick={async () => {
+                let imageFile = null;
 
-              let imageFile = null;
+                const handleImageClick = () =>
+                  document.getElementById("fileInput")?.click();
 
-              const handleImageClick = () =>
-                document.getElementById("fileInput")?.click();
+                const handleImageChange = async (e) => {
+                  const file = e.target.files?.[0];
 
-              const handleImageChange = async (e) => {
-                const file = e.target.files?.[0];
+                  if (!file) return;
 
-                if (!file) return;
+                  const compressed = await compressImage(file);
 
-                const compressed = await compressImage(file);
+                  if (!compressed) return;
 
-                if (!compressed) return;
+                  imageFile = compressed;
 
-                imageFile = compressed;
+                  const reader = new FileReader();
 
-                const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    const preview =
+                      document.getElementById("preview");
 
-                reader.onload = (ev) => {
-                  const preview =
-                    document.getElementById("preview");
-
-                  const placeholder =
-                    document.getElementById(
-                      "placeholderIcon"
-                    );
-
-                  preview.src = ev.target.result;
-                  preview.style.display = "block";
-
-                  placeholder.style.display = "none";
-                };
-
-                reader.readAsDataURL(imageFile);
-              };
-
-              const result = await Swal.fire({
-                title: "طلب انضمام لاعب",
-                html: registrationFormTemplate,
-
-                showCancelButton: true,
-                confirmButtonText: "إرسال الطلب",
-                cancelButtonText: "إلغاء",
-
-                scrollbarPadding: false,
-
-                didOpen: () => {
-                  document
-                    .getElementById("imagePicker")
-                    ?.addEventListener(
-                      "click",
-                      handleImageClick
-                    );
-
-                  document
-                    .getElementById("fileInput")
-                    ?.addEventListener(
-                      "change",
-                      handleImageChange
-                    );  
-                  
-                  // ضبط القيود لحقل التاريخ
-                  const birthDateInput = document.getElementById("birth-date");
-                  if (birthDateInput) {
-                    const today = new Date();
-                    
-                    const maxYear = today.getFullYear() - 3;
-                    const maxDate = `${maxYear}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-                    
-                    const minYear = today.getFullYear() - 20;
-                    const minDate = `${minYear}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-                    
-                    birthDateInput.setAttribute("max", maxDate); 
-                    birthDateInput.setAttribute("min", minDate); 
-                  }
-                },
-
-                willClose: () => {
-                  document
-                    .getElementById("imagePicker")
-                    ?.removeEventListener(
-                      "click",
-                      handleImageClick
-                    );
-
-                  document
-                    .getElementById("fileInput")
-                    ?.removeEventListener(
-                      "change",
-                      handleImageChange
-                    );
-                },
-
-                preConfirm: () => {
-                  const playerName =
-                    document.getElementById(
-                      "player-name"
-                    )?.value;
-
-                  const birthDate =
-                    document.getElementById(
-                      "birth-date"
-                    )?.value;
-
-                  const position =
-                    document.getElementById(
-                      "player-position"
-                    )?.value;
-
-                  const branch =
-                    document.getElementById(
-                      "player-branch"
-                    )?.value;  
-
-                  const phone =
-                    document.getElementById(
-                      "parent-phone"
-                    )?.value;
-
-                  const medicalNotes =
-                    document.getElementById(
-                      "medical-notes"
-                    )?.value;
-
-                  if (
-                    !playerName ||
-                    !birthDate ||
-                    !position ||
-                    !branch ||
-                    !phone
-                  ) {
-                    return Swal.showValidationMessage(
-                      "أكمل الحقول المطلوبة"
-                    );
-                  }
-
-                  return {
-                    playerName,
-                    birthDate,
-                    position,
-                    branch,
-                    phone,
-                    medicalNotes,
-                  };
-                },
-              });
-
-              if (!result.isConfirmed) return;
-
-              try {
-                Swal.fire({
-                  title: "جاري إرسال الطلب...",
-                  allowOutsideClick: false,
-                  didOpen: () => Swal.showLoading(),
-                });
-
-                let imageUrl = null;
-
-                if (imageFile) {
-                  // 🚀 تم تغيير المسار ليتم رفعه داخل باكت الـ avatars في مجلد requests للتنظيم
-                  const filePath = `requests/${Date.now()}.jpg`;
-
-                  const { error: uploadError } =
-                    await supabase.storage
-                      .from("avatars") // اسم الباكت الجديد الموحد
-                      .upload(
-                        filePath,
-                        imageFile
+                    const placeholder =
+                      document.getElementById(
+                        "placeholderIcon"
                       );
 
-                  if (uploadError)
-                    throw uploadError;
+                    preview.src = ev.target.result;
+                    preview.style.display = "block";
 
-                  const { data } =
-                    supabase.storage
-                      .from("avatars")
-                      .getPublicUrl(filePath);
+                    placeholder.style.display = "none";
+                  };
 
-                  imageUrl =
-                    data.publicUrl;
+                  reader.readAsDataURL(imageFile);
+                };
+
+                const result = await Swal.fire({
+                  title: "طلب انضمام لاعب",
+                  html: registrationFormTemplate,
+
+                  showCancelButton: true,
+                  confirmButtonText: "إرسال الطلب",
+                  cancelButtonText: "إلغاء",
+
+                  scrollbarPadding: false,
+
+                  didOpen: () => {
+                    document
+                      .getElementById("imagePicker")
+                      ?.addEventListener(
+                        "click",
+                        handleImageClick
+                      );
+
+                    document
+                      .getElementById("fileInput")
+                      ?.addEventListener(
+                        "change",
+                        handleImageChange
+                      );  
+                    
+                    const birthDateInput = document.getElementById("birth-date");
+                    if (birthDateInput) {
+                      const today = new Date();
+                      
+                      const maxYear = today.getFullYear() - 3;
+                      const maxDate = `${maxYear}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                      
+                      const minYear = today.getFullYear() - 20;
+                      const minDate = `${minYear}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                      
+                      birthDateInput.setAttribute("max", maxDate); 
+                      birthDateInput.setAttribute("min", minDate); 
+                    }
+                  },
+
+                  willClose: () => {
+                    document
+                      .getElementById("imagePicker")
+                      ?.removeEventListener(
+                        "click",
+                        handleImageClick
+                      );
+
+                    document
+                      .getElementById("fileInput")
+                      ?.removeEventListener(
+                        "change",
+                        handleImageChange
+                      );
+                  },
+
+                  preConfirm: () => {
+                    const playerName =
+                      document.getElementById(
+                        "player-name"
+                      )?.value;
+
+                    const birthDate =
+                      document.getElementById(
+                        "birth-date"
+                      )?.value;
+
+                    const position =
+                      document.getElementById(
+                        "player-position"
+                      )?.value;
+
+                    const branch =
+                      document.getElementById(
+                        "player-branch"
+                      )?.value;  
+
+                    const phone =
+                      document.getElementById(
+                        "parent-phone"
+                      )?.value;
+
+                    const medicalNotes =
+                      document.getElementById(
+                        "medical-notes"
+                      )?.value;
+
+                    if (
+                      !playerName ||
+                      !birthDate ||
+                      !position ||
+                      !branch ||
+                      !phone
+                    ) {
+                      return Swal.showValidationMessage(
+                        "أكمل الحقول المطلوبة"
+                      );
+                    }
+
+                    return {
+                      playerName,
+                      birthDate,
+                      position,
+                      branch,
+                      phone,
+                      medicalNotes,
+                    };
+                  },
+                });
+
+                if (!result.isConfirmed) return;
+
+                try {
+                  Swal.fire({
+                    title: "جاري إرسال الطلب...",
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading(),
+                  });
+
+                  let imageUrl = null;
+
+                  if (imageFile) {
+                    // 🚀 تم تغيير المسار ليتم رفعه داخل باكت الـ avatars في مجلد requests للتنظيم
+                    const filePath = `requests/${Date.now()}.jpg`;
+
+                    const { error: uploadError } =
+                      await supabase.storage
+                        .from("avatars") // اسم الباكت الجديد الموحد
+                        .upload(
+                          filePath,
+                          imageFile
+                        );
+
+                    if (uploadError)
+                      throw uploadError;
+
+                    const { data } =
+                      supabase.storage
+                        .from("avatars")
+                        .getPublicUrl(filePath);
+
+                    imageUrl =
+                      data.publicUrl;
+                  }
+
+                  const { error } =
+                    await supabase
+                      .from(
+                        "registration_requests"
+                      )
+                      .insert([
+                        {
+                          academy_id:
+                            ACADEMY_ID,
+
+                          player_name:
+                            result.value
+                              .playerName,
+
+                          birth_date:
+                            result.value
+                              .birthDate,
+
+                          position:
+                            result.value
+                              .position,
+                          
+                          branch: result.value.branch,
+
+                          parent_phone:
+                            result.value
+                              .phone,
+
+                          medical_notes:
+                            result.value
+                              .medicalNotes,
+
+                          player_image:
+                            imageUrl,
+
+                          status:
+                            "pending",
+                        },
+                      ]);
+
+                  if (error) throw error;
+
+                  Swal.fire({
+                    icon: "success",
+                    title:
+                      "تم إرسال الطلب بنجاح",
+                    text:
+                      "سيتم مراجعة البيانات والتواصل معكم قريباً",
+                  });
+                } catch (err) {
+                  Swal.fire({
+                    icon: "error",
+                    title: "حدث خطأ",
+                    text: err.message,
+                  });
                 }
-
-                const { error } =
-                  await supabase
-                    .from(
-                      "registration_requests"
-                    )
-                    .insert([
-                      {
-                        academy_id:
-                          ACADEMY_ID,
-
-                        player_name:
-                          result.value
-                            .playerName,
-
-                        birth_date:
-                          result.value
-                            .birthDate,
-
-                        position:
-                          result.value
-                            .position,
-                        
-                        branch: result.value.branch,
-
-                        parent_phone:
-                          result.value
-                            .phone,
-
-                        medical_notes:
-                          result.value
-                            .medicalNotes,
-
-                        player_image:
-                          imageUrl,
-
-                        status:
-                          "pending",
-                      },
-                    ]);
-
-                if (error) throw error;
-
-                Swal.fire({
-                  icon: "success",
-                  title:
-                    "تم إرسال الطلب بنجاح",
-                  text:
-                    "سيتم مراجعة البيانات والتواصل معكم قريباً",
-                });
-              } catch (err) {
-                Swal.fire({
-                  icon: "error",
-                  title: "حدث خطأ",
-                  text: err.message,
-                });
-              }
-            }}
-          >
-            تسجيل لاعب جديد
-          </button>
-        </div>
-
-        <div className="player-search-box mt-4">
-          <h5 className="mb-3">{t("hero.search.title")}</h5>
-          <div className="d-flex justify-content-center gap-2 flex-wrap">
-            <input
-              type="text"
-              className="form-control search-input"
-              placeholder={t("hero.search.placeholder")}
-              value={playerCode}
-              onChange={(e) => setPlayerCode(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            />
-            <button className="btn btn-primary btn-search-custom" onClick={handleSearch}>
-              <FontAwesomeIcon icon={faSearch} />
+              }}
+            >
+              تسجيل لاعب جديد
             </button>
           </div>
-        </div>
 
-        <div className="stats hero-stats mt-5 d-flex justify-content-center gap-4 flex-wrap">
-          <StatItem value={players} label={t("hero.players")} plus />
-          <StatItem value={coaches} label={t("hero.coaches")} />
-          <StatItem value={championships} label={t("hero.championships")} plus />
+          <div className="player-search-box mt-4">
+            <h5 className="mb-3">{t("hero.search.title")}</h5>
+            <div className="d-flex justify-content-center gap-2 flex-wrap">
+              <input
+                type="text"
+                className="form-control search-input"
+                placeholder={t("hero.search.placeholder")}
+                value={playerCode}
+                onChange={(e) => setPlayerCode(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              />
+              <button className="btn btn-primary btn-search-custom" onClick={handleSearch}>
+                <FontAwesomeIcon icon={faSearch} />
+              </button>
+            </div>
+          </div>
+
+          <div className="stats hero-stats mt-5 d-flex justify-content-center gap-4 flex-wrap">
+            <StatItem value={players} label={t("hero.players")} plus />
+            <StatItem value={coaches} label={t("hero.coaches")} />
+            <StatItem value={championships} label={t("hero.championships")} plus />
+          </div>
         </div>
-      </div>
-    </section>
+      </section>    
+    </>
+
   );
 }
 

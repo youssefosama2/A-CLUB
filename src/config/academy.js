@@ -1,0 +1,1 @@
+export const ACADEMY_ID = "11116ae7-68dc-4b21-9803-c74d583f3354";

@@ -288,7 +288,7 @@ export default function HeroSection() {
                       const maxYear = today.getFullYear() - 3;
                       const maxDate = `${maxYear}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
                       
-                      const minYear = today.getFullYear() - 20;
+                      const minYear = today.getFullYear() - 30;
                       const minDate = `${minYear}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
                       
                       birthDateInput.setAttribute("max", maxDate); 
